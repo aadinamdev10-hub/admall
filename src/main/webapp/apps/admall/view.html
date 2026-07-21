@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Application Record Details</title>
+  <link rel="stylesheet" href="css/style.css?v=1.0.25">
+  <style>
+    /* Specific view page styling */
+    .print-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+  <!-- Print controls -->
+  <div class="print-bar no-print">
+    <h3 style="margin:0; font-family:'Outfit', sans-serif; color:var(--primary);">Individual Application View</h3>
+    <div style="display:flex; gap:0.5rem;">
+      <button class="btn btn-primary btn-sm" onclick="window.print()">Print</button>
+      <button class="btn btn-danger btn-sm" onclick="window.close()">✕ Close</button>
+    </div>
+  </div>
+
+  <div id="alert" class="alert"></div>
+  <div id="loading" style="text-align:center; padding:3rem; color:var(--muted)">
+    <span class="spinner"></span> Loading application details...
+  </div>
+
+  <!-- Main view container -->
+  <div id="viewContainer" style="display:none;" class="individual-form-container">
+    <!-- App Header -->
+    <div class="app-header-App">
+      <div class="App-banner-left">
+        <img src="images/App_logo.png" class="App-header-logo" alt="App Logo">
+      </div>
+      <div class="App-banner-right-top">
+        <div class="App-title-en">Application Portal, Main Campus</div>
+        <div class="App-sub-en">(Established by Ministry of Education, Government of India)</div>
+      </div>
+      <div class="App-banner-right-bottom">
+        <div class="App-form-title-text">Application Record Details</div>
+        <div class="App-app-id" id="recordTitleId">Record Database ID: #N/A</div>
+      </div>
+    </div>
+
+    <!-- Dynamic form content goes here -->
+    <div id="formContent"></div>
+  </div>
+</div>
+
+<script src="js/view.js?v=1.0.20"></script>
+</body>
+</html>

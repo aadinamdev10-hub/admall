@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Student Admit Card</title>
+  <link rel="stylesheet" href="css/style.css?v=1.0.25">
+  <style>
+    body {
+      background: #f1f5f9;
+      padding: 1.5rem;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    
+    .print-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .admit-card-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 2.5rem;
+      border: 1.5px solid #000;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      box-sizing: border-box;
+    }
+
+    /* Header Table Styles */
+    .admit-header-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #000;
+      margin-bottom: -1px;
+    }
+    
+    .admit-logo-cell {
+      width: 15%;
+      border: 1px solid #000;
+      padding: 10px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    
+    .admit-logo-cell img {
+      max-height: 80px;
+      max-width: 100%;
+      object-fit: contain;
+    }
+    
+    .admit-title-cell {
+      width: 85%;
+      border: 1px solid #000;
+      padding: 10px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    
+    .App-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin: 0 0 4px 0;
+      color: #000;
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+    }
+    
+    .App-subtitle, .App-university, .App-ministry {
+      font-size: 0.8rem;
+      margin: 2px 0;
+      color: #000;
+      font-weight: 600;
+    }
+
+    .admit-exam-title {
+      border: 1px solid #000;
+      padding: 12px;
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: 800;
+      background: #fff;
+      line-height: 1.4;
+      color: #000;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Main Grid Table */
+    .admit-grid-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #000;
+      table-layout: fixed;
+    }
+    
+    .admit-grid-table td {
+      border: 1px solid #000;
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      color: #000;
+      vertical-align: middle;
+      line-height: 1.3;
+    }
+    
+    .detail-label-val-cell {
+      width: 60%;
+      text-align: left;
+    }
+    
+    .box-photo-paste {
+      width: 20%;
+      text-align: center;
+      vertical-align: middle !important;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #334155;
+      padding: 5px !important;
+      background: #fff;
+    }
+    
+    .box-photo-uploaded {
+      width: 20%;
+      text-align: center;
+      vertical-align: middle !important;
+      padding: 5px !important;
+      background: #fff;
+    }
+    
+    .box-photo-uploaded img {
+      max-width: 100%;
+      max-height: 120px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+    
+    .photo-placeholder-text {
+      font-size: 0.68rem;
+      color: #64748b;
+      font-weight: 600;
+      border: 1px dashed #cbd5e1;
+      padding: 8px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .box-sig-candidate {
+      width: 20%;
+      vertical-align: top !important;
+      padding: 6px !important;
+      height: 90px;
+      box-sizing: border-box;
+    }
+    
+    .sig-title-top {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+    
+    .box-sig-invigilator {
+      width: 20%;
+      vertical-align: bottom !important;
+      padding: 6px !important;
+      height: 90px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    
+    .sig-space-invigilator {
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 2px;
+    }
+    
+    .sig-space-invigilator img {
+      max-height: 40px;
+      max-width: 100%;
+      object-fit: contain;
+    }
+    
+    .sig-title-bottom {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* Instructions Page Styles */
+    .instructions-container {
+      margin-top: 2rem;
+    }
+    
+    .instructions-header {
+      text-align: center;
+      border-top: 3px double #000;
+      border-bottom: 3px double #000;
+      padding: 10px 0;
+      margin-bottom: 1.5rem;
+    }
+    
+    .instructions-header h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #000;
+    }
+    
+    .instructions-list {
+      margin: 0;
+      padding-left: 1.5rem;
+      font-size: 0.82rem;
+      color: #000;
+      line-height: 1.6;
+    }
+    
+    .instructions-list li {
+      margin-bottom: 0.75rem;
+      text-align: justify;
+    }
+    
+    .instructions-list ul {
+      margin-top: 0.35rem;
+      margin-bottom: 0.35rem;
+      padding-left: 1.2rem;
+      list-style-type: disc;
+    }
+    
+    .instructions-list ul li {
+      margin-bottom: 0.2rem;
+    }
+
+    .error-container {
+      max-width: 500px;
+      margin: 4rem auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 2.5rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+    }
+    
+    .error-title {
+      font-size: 1.5rem;
+      color: var(--error);
+      margin-bottom: 1rem;
+    }
+
+    .error-msg {
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    @media print {
+      @page {
+        margin: 10mm 8mm 10mm 8mm;
+      }
+      body {
+        background: #ffffff;
+        padding: 0;
+        margin: 0;
+        font-size: 10pt;
+      }
+      .admit-card-container {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+        width: 100%;
+      }
+      .print-controls, .no-print {
+        display: none !important;
+      }
+      /* Force Instructions to Page 2 */
+      .instructions-container {
+        page-break-before: always;
+        margin-top: 0;
+        padding-top: 1.5rem;
+      }
+      /* Admit card header table */
+      .admit-header-table,
+      .admit-header-table td {
+        border: 1px solid #000000 !important;
+      }
+      /* Constrain images */
+      img {
+        max-width: 100% !important;
+        height: auto !important;
+      }
+      /* Detail rows */
+      .detail-row {
+        page-break-inside: avoid !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="print-controls no-print" id="printControls" style="display:none;">
+  <div style="font-family:'Outfit', sans-serif; color:var(--primary); font-size:1.1rem; font-weight:700;">
+    Candidate Admit Card Portal
+  </div>
+  <div style="display:flex; gap:0.5rem;">
+    <button class="btn btn-primary btn-sm" onclick="window.print()">Print / Download as PDF</button>
+    <a href="student_login.html" class="btn btn-secondary btn-sm" style="text-decoration:none;">✕ Exit</a>
+  </div>
+</div>
+
+<div class="admit-card-container" id="admitCardWrapper" style="display:none;">
+  <div id="loading" style="text-align:center; padding:3rem; color:var(--muted)">
+    <span class="spinner"></span> Loading admit card details...
+  </div>
+
+  <div id="admitCardContent" style="display:none;">
+    <!-- ================= PAGE 1: ADMIT CARD ================= -->
+    <table class="admit-header-table">
+      <tr>
+        <td class="admit-logo-cell">
+          <img src="images/App_logo.png" alt="App Logo" onerror="this.style.display='none'">
+        </td>
+        <td class="admit-title-cell">
+          <h2 class="App-title">Application Portal</h2>
+          <p class="App-subtitle">Academic Block, Main Campus</p>
+          <p class="App-university">Deemed to be University under Distinct Category</p>
+          <p class="App-ministry">(Ministry of Education, Govt. of India, New Delhi)</p>
+        </td>
+      </tr>
+    </table>
+    
+    <div class="admit-exam-title" id="admitTitleText">
+      Admit Card - Entrance Examination
+    </div>
+
+    <table class="admit-grid-table">
+      <tr>
+        <td class="detail-label-val-cell"><strong>Candidate Name:</strong> <span id="lblCandidateName">—</span></td>
+        <td rowspan="5" class="box-photo-paste">
+          Paste your Passport Photo
+        </td>
+        <td rowspan="5" class="box-photo-uploaded" id="uploadedPhotoCell">
+          <div class="photo-placeholder-text">Paste your photograph here</div>
+        </td>
+      </tr>
+      <tr>
+        <td class="detail-label-val-cell"><strong>Application ID:</strong> <span id="lblApplicationId">—</span></td>
+      </tr>
+      <tr>
+        <td class="detail-label-val-cell"><strong>Date of Birth (DD/MM/YYYY):</strong> <span id="lblDOB">—</span></td>
+      </tr>
+      <tr>
+        <td class="detail-label-val-cell"><strong>Gender:</strong> <span id="lblGender">—</span></td>
+      </tr>
+      <tr>
+        <td class="detail-label-val-cell"><strong>Caste Category:</strong> <span id="lblCaste">—</span></td>
+      </tr>
+      <tr>
+        <td class="detail-label-val-cell"><strong>Name of School:</strong> <span id="lblSchool">—</span></td>
+        <td rowspan="2" class="box-sig-candidate">
+          <div class="sig-title-top">Candidate Signature in presence of Invigilator</div>
+        </td>
+        <td rowspan="2" class="box-sig-invigilator">
+          <div class="sig-space-invigilator" id="uploadedSigContainer"></div>
+          <div class="sig-title-bottom">Invigilator Signature</div>
+        </td>
+      </tr>
+      <tr>
+        <td class="detail-label-val-cell"><strong>Name of Department:</strong> <span id="lblDepartment">—</span></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="detail-label-val-cell"><strong>Subject:</strong> <span id="lblSubject">—</span></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="detail-label-val-cell"><strong>Name & Address of Examination Center:</strong> <span id="lblVenue">—</span></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="detail-label-val-cell"><strong>Examination Date:</strong> <span id="lblExamDate">—</span></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="detail-label-val-cell"><strong>Examination Timing:</strong> <span id="lblExamTime">—</span></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="detail-label-val-cell"><strong>Candidate Reporting Time(At Examination Center):</strong> <span id="lblReportingTime">—</span></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="detail-label-val-cell"><strong>Gate Closure Time:</strong> <span id="lblGateClosureTime">—</span></td>
+      </tr>
+    </table>
+
+    <!-- ================= PAGE 2: INSTRUCTIONS ================= -->
+    <div class="instructions-container" id="instructionsCard" style="display:none;">
+      <div class="instructions-header">
+        <h3>Instructions</h3>
+      </div>
+      <ol class="instructions-list" id="instructionsList">
+        <!-- Dynamically populated -->
+      </ol>
+    </div>
+  </div>
+</div>
+
+<div class="error-container" id="errorWrapper" style="display:none;">
+  <h2 class="error-title">Access Error</h2>
+  <div class="error-msg" id="errorMsgText">Invalid or missing parameters. Please login to access your admit card.</div>
+  <a href="student_login.html" class="btn btn-primary">Go to Student Login</a>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(location.search);
+    const token = params.get("token");
+    const recordId = params.get("recordId");
+    const datasetId = params.get("datasetId");
+
+    if (!token && (!recordId || !datasetId)) {
+      showFatalError("Missing security token or parameters. Please log in again.");
+      return;
+    }
+
+    // Show wrappers for card content and loading
+    document.getElementById("admitCardWrapper").style.display = "block";
+
+    // Build URL paths based on token presence
+    const recordUrl = token ? `api/record?token=${encodeURIComponent(token)}` : `api/record?id=${recordId}`;
+    const configUrl = token ? `api/datasets?action=getAdmitConfig&token=${encodeURIComponent(token)}` : `api/datasets?action=getAdmitConfig&datasetId=${datasetId}`;
+
+    // 1. Fetch Candidate Record Details
+    fetch(recordUrl)
+      .then(r => {
+        if (!r.ok) {
+          return r.json().then(errData => {
+            throw new Error(errData.error || "Failed to load candidate record.");
+          }).catch(() => {
+            throw new Error("Failed to load candidate record.");
+          });
+        }
+        return r.json();
+      })
+      .then(data => {
+        if (!data) return;
+        const record = data.record;
+
+        // 2. Fetch Admit Card Configuration for this Dataset
+        return fetch(configUrl)
+          .then(r => {
+            if (!r.ok) throw new Error("Failed to load admit card configuration.");
+            return r.json();
+          })
+          .then(config => {
+            document.getElementById("loading").style.display = "none";
+            document.getElementById("admitCardContent").style.display = "block";
+            document.getElementById("printControls").style.display = "flex";
+            renderAdmitCard(record, config, recordId);
+          });
+      })
+      .catch(err => {
+        document.getElementById("loading").style.display = "none";
+        showFatalError("Failed to generate Admit Card: " + err.message);
+      });
+  });
+
+  function showFatalError(msg) {
+    document.getElementById("admitCardWrapper").style.display = "none";
+    document.getElementById("printControls").style.display = "none";
+    document.getElementById("errorMsgText").textContent = msg;
+    document.getElementById("errorWrapper").style.display = "block";
+  }
+
+  function getRecordFieldValueByPrefix(record, prefix) {
+    if (!record || !prefix) return null;
+    const lowerPrefix = prefix.toLowerCase().trim();
+    for (let key in record) {
+      const lowerKey = key.toLowerCase().trim();
+      if (lowerKey === lowerPrefix) {
+        return { key: key, value: record[key] };
+      }
+      if (lowerKey.startsWith(lowerPrefix)) {
+        const remaining = lowerKey.slice(lowerPrefix.length);
+        if (remaining.length === 0 || !/^[a-z0-9]/.test(remaining)) {
+          return { key: key, value: record[key] };
+        }
+      }
+    }
+    return null;
+  }
+
+  function renderAdmitCard(record, config, recordId) {
+    const admitCard = config.admitCard || {};
+    const fields = admitCard.fields || [];
+
+    // Helper function to resolve fields dynamically from config or CSV prefix fallback
+    function resolveFieldValue(labelKeyword, sourceKeyword, fallbackPrefix) {
+      const fieldConfig = fields.find(f => 
+        (f.label && f.label.toLowerCase().includes(labelKeyword.toLowerCase())) || 
+        (f.source && f.source.toLowerCase().includes(sourceKeyword.toLowerCase()))
+      );
+      
+      let val = "";
+      if (fieldConfig) {
+        if (fieldConfig.source === "candidateId") {
+          const match = getRecordFieldValueByPrefix(record, "candidateId");
+          val = match ? match.value : `#${recordId}`;
+        } else if (fieldConfig.source) {
+          const match = getRecordFieldValueByPrefix(record, fieldConfig.source);
+          val = match ? match.value : "";
+        }
+      }
+      
+      if (!val || String(val).trim() === "") {
+        const match = getRecordFieldValueByPrefix(record, fallbackPrefix);
+        val = match ? match.value : "";
+      }
+      
+      return val && String(val).trim() !== "" ? val : "—";
+    }
+
+    // Set Title
+    if (admitCard.title) {
+      const titleParts = admitCard.title.split('\n');
+      let titleHtml = "";
+      titleParts.forEach((part, index) => {
+        if (index === 0) {
+          titleHtml += part;
+        } else {
+          titleHtml += `<br><span style="font-weight: 800;">${part}</span>`;
+        }
+      });
+      document.getElementById("admitTitleText").innerHTML = titleHtml;
+    }
+
+    // Populate Details Table
+    document.getElementById("lblCandidateName").textContent = resolveFieldValue("name", "B1", "B1");
+    
+    let appIdVal = resolveFieldValue("id", "candidateId", "candidateId");
+    if (appIdVal === "—") {
+      appIdVal = `#${recordId}`;
+    }
+    document.getElementById("lblApplicationId").textContent = appIdVal;
+    
+    document.getElementById("lblDOB").textContent = resolveFieldValue("birth", "B3", "B3");
+    document.getElementById("lblGender").textContent = resolveFieldValue("gender", "B5", "B5");
+    document.getElementById("lblCaste").textContent = resolveFieldValue("caste", "B9", "B9");
+    document.getElementById("lblSchool").textContent = resolveFieldValue("school", "A1", "A1");
+    document.getElementById("lblDepartment").textContent = resolveFieldValue("department", "A2", "A2");
+    document.getElementById("lblSubject").textContent = resolveFieldValue("subject", "A4", "A4");
+
+    // Render Photograph
+    const photoCell = document.getElementById("uploadedPhotoCell");
+    photoCell.innerHTML = "";
+    
+    let photoVal = "";
+    if (admitCard.photographSource) {
+      const match = getRecordFieldValueByPrefix(record, admitCard.photographSource);
+      photoVal = match ? match.value : "";
+    }
+    if (photoVal && String(photoVal).trim().startsWith("http")) {
+      photoCell.innerHTML = `<img src="${photoVal.trim()}" class="box-photo-uploaded img" alt="Candidate Photo">`;
+    } else {
+      photoCell.innerHTML = `<div class="photo-placeholder-text">Paste your photograph here</div>`;
+    }
+
+    // Render Uploaded Invigilator / Candidate Signature in right box
+    const sigContainer = document.getElementById("uploadedSigContainer");
+    sigContainer.innerHTML = "";
+    
+    let sigVal = "";
+    if (admitCard.signatureSource) {
+      const match = getRecordFieldValueByPrefix(record, admitCard.signatureSource);
+      sigVal = match ? match.value : "";
+    }
+    if (sigVal && String(sigVal).trim().startsWith("http")) {
+      sigContainer.innerHTML = `<img src="${sigVal.trim()}" class="sig-space-invigilator img" alt="Uploaded Signature">`;
+    }
+
+    // Render Exam Details
+    const examDetails = admitCard.examDetails || {};
+    document.getElementById("lblExamDate").textContent = examDetails.date || "—";
+    document.getElementById("lblExamTime").textContent = examDetails.time || "—";
+    document.getElementById("lblReportingTime").textContent = examDetails.reportingTime || "—";
+    document.getElementById("lblVenue").textContent = examDetails.venue || "—";
+    document.getElementById("lblGateClosureTime").textContent = examDetails.gateClosureTime || "—";
+
+    // Render Instructions
+    const instructions = admitCard.instructions || [];
+    if (instructions.length > 0) {
+      const instructionsCard = document.getElementById("instructionsCard");
+      const instructionsList = document.getElementById("instructionsList");
+      instructionsList.innerHTML = "";
+      
+      instructions.forEach(ins => {
+        const li = document.createElement("li");
+        li.innerHTML = ins; // Render raw HTML to support nested bullet structures
+        instructionsList.appendChild(li);
+      });
+      
+      instructionsCard.style.display = "block";
+    }
+  }
+</script>
+</body>
+</html>

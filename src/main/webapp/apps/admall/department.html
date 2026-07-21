@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Department Dashboard - App Portal</title>
+  <link rel="stylesheet" href="css/style.css?v=1.0.25">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: var(--bg);
+    }
+    .page {
+      flex-grow: 1;
+      max-width: 1000px;
+      margin: 3rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+    }
+    .user-menu-top {
+      position: absolute;
+      top: 50%;
+      right: 1.5rem;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .user-menu-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--primary);
+    }
+    .footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: #ffffff;
+      margin-top: auto;
+    }
+    .link-btn {
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── App Banner Header ── -->
+  <div class="App-banner" style="position: relative;">
+    <img src="images/App_banner.png" class="App-logo-img" alt="App Portal Logo">
+    <div class="user-menu-top" id="userMenuTop" style="display: none;">
+      <span class="user-menu-name" id="userDisplayName">Welcome</span>
+      <a href="api/logout" class="btn btn-outline btn-sm">Logout</a>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="card">
+      <h2 class="card-title">Department Dashboard</h2>
+      
+      <div id="alertBox" class="alert alert-error"></div>
+      
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Link</th>
+            </tr>
+          </thead>
+          <tbody id="deptTableBody">
+            <tr>
+              <td colspan="4" style="text-align: center; padding: 2rem;">
+                <span class="spinner"></span> Loading department details...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    © 2026 Application Portal (App), Main Campus. All Rights Reserved.
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Fetch Session Data
+      fetch("api/session")
+        .then(resp => {
+          if (resp.status === 401) {
+            window.location.href = "login.html";
+            return;
+          }
+          return resp.json();
+        })
+        .then(session => {
+          if (!session) return;
+          const role = session.role ? session.role.trim() : "";
+          if (!session.loggedIn) {
+            window.location.href = "login.html";
+            return;
+          }
+          if (role !== "department") {
+            if (role === "admission") {
+              window.location.href = "admission.html";
+            } else {
+              window.location.href = "index.html";
+            }
+            return;
+          }
+
+          // Show welcome message
+          const userMenuTop = document.getElementById("userMenuTop");
+          const userDisplayName = document.getElementById("userDisplayName");
+          userDisplayName.textContent = `Welcome, ${session.username}`;
+          userMenuTop.style.display = "flex";
+
+          // 2. Fetch Department Info
+          return fetch("api/department-info");
+        })
+        .then(resp => {
+          if (!resp) return;
+          if (resp.status !== 200) {
+            return resp.json().then(errData => {
+              throw new Error(errData.message || "Failed to fetch department info.");
+            });
+          }
+          return resp.json();
+        })
+        .then(info => {
+          if (!info) return;
+
+          const tbody = document.getElementById("deptTableBody");
+          tbody.innerHTML = ""; // Clear loader
+
+          const tr = document.createElement("tr");
+
+          // User ID
+          const tdId = document.createElement("td");
+          tdId.textContent = info.userid;
+          tr.appendChild(tdId);
+
+          // Name
+          const tdName = document.createElement("td");
+          tdName.textContent = info.username;
+          tr.appendChild(tdName);
+
+          // Description
+          const tdDesc = document.createElement("td");
+          tdDesc.textContent = info.description || "";
+          tr.appendChild(tdDesc);
+
+          // Link button
+          const tdLink = document.createElement("td");
+          const aBtn = document.createElement("a");
+          if (info.link) {
+            let targetLink = info.link;
+            if (!targetLink.includes("index.html") && !targetLink.startsWith("http")) {
+              targetLink = "index.html?department=" + encodeURIComponent(targetLink);
+            }
+            // Append a cache-buster parameter to force browser to load fresh index.html
+            const connector = targetLink.includes("?") ? "&" : "?";
+            targetLink += connector + "_cb=" + new Date().getTime();
+            
+            aBtn.href = targetLink;
+            aBtn.textContent = "View Dashboard (" + info.link + ")";
+            aBtn.title = targetLink;
+          } else {
+            aBtn.href = "#";
+            aBtn.textContent = "No Link Configured";
+          }
+          aBtn.className = "btn btn-primary btn-sm link-btn";
+          aBtn.style.whiteSpace = "nowrap";
+          aBtn.style.overflow = "hidden";
+          aBtn.style.textOverflow = "ellipsis";
+          aBtn.style.display = "inline-block";
+          aBtn.style.maxWidth = "450px";
+          aBtn.style.verticalAlign = "middle";
+          
+          tdLink.appendChild(aBtn);
+          tr.appendChild(tdLink);
+
+          tbody.appendChild(tr);
+        })
+        .catch(err => {
+          console.error(err);
+          const alertBox = document.getElementById("alertBox");
+          alertBox.textContent = err.message || "An error occurred while loading dashboard.";
+          alertBox.classList.add("show");
+          
+          const tbody = document.getElementById("deptTableBody");
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="4" style="text-align: center; color: var(--error); padding: 2rem;">
+                Failed to load department details.
+              </td>
+            </tr>
+          `;
+        });
+    });
+  </script>
+</body>
+</html>

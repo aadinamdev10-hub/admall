@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Dynamic CSV-to-JSON Reporting & Form Platform</title>
+  <link rel="stylesheet" href="css/style.css?v=1.0.25">
+  <style>
+    /* Custom enhancements for the dashboard */
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+      animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .clickable-cell {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--primary);
+      transition: background-color 0.2s;
+    }
+    .clickable-cell:hover {
+      background-color: var(--primary-light) !important;
+      text-decoration: underline;
+    }
+    .total-cell {
+      font-weight: 700;
+      background-color: #f1f5f9;
+    }
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-container {
+      background-color: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+      padding: 2rem;
+    }
+    .modal-overlay.active .modal-container {
+      transform: scale(1);
+    }
+
+    .no-data-msg {
+      text-align: center;
+      color: var(--muted);
+      padding: 2rem;
+      font-style: italic;
+    }
+    .user-menu-top {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      align-self: center;
+    }
+    .user-menu-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+  </style>
+</head>
+<body>
+
+<div class="App-banner no-print">
+  <img src="images/App_banner.png" class="App-logo-img" alt="App Portal Logo">
+</div>
+
+<!-- ── Navigation Tabs Bar ── -->
+<div class="tabs-nav no-print">
+  <a href="#" class="tab-link active" data-tab="datasets-tab">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+    Datasets Dashboard
+  </a>
+  <a href="#" class="tab-link" data-tab="report-tab" id="pivotReportTabLink">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    Report
+  </a>
+  <a href="#" class="tab-link" data-tab="drilldown-tab" id="drillDownTabLink">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Student List
+  </a>
+  <div class="user-menu-top no-print" id="userMenuTop" style="display: none;">
+    <span class="user-menu-name" id="userDisplayName">User</span>
+    <a href="api/logout" class="btn btn-sm" style="color: white; border: 1px solid rgba(255, 255, 255, 0.4); background: transparent; transition: all 0.2s; white-space: nowrap;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='transparent'">Logout</a>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ================= TAB 1: DATASETS ================= -->
+  <div id="datasets-tab" class="tab-content active">
+    <!-- CSV Upload Card -->
+    <div class="card" id="uploadCard">
+      <div class="card-title">Upload New Dataset</div>
+      <div id="uploadAlert" class="alert"></div>
+
+      <form id="uploadForm" onsubmit="handleUpload(event)">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+          <div class="form-group">
+            <label for="datasetName">Dataset / Application Name *</label>
+            <input type="text" id="datasetName" class="form-control" placeholder="e.g. Admission_Batch_2026" required>
+          </div>
+          <div class="form-group">
+            <label for="csvFile">CSV File Upload *</label>
+            <input type="file" id="csvFile" class="form-control" accept=".csv" required>
+          </div>
+        </div>
+
+        <div style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.75rem; color: var(--primary);">Required Configuration Files (JSON)</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+          <div class="form-group">
+            <label for="formConfigFile">Form Layout JSON *</label>
+            <input type="file" id="formConfigFile" class="form-control" accept=".json" required>
+          </div>
+          <div class="form-group">
+            <label for="summaryConfigFile">Report JSON *</label>
+            <input type="file" id="summaryConfigFile" class="form-control" accept=".json" required>
+          </div>
+          <div class="form-group">
+            <label for="studentListConfigFile">Student List JSON *</label>
+            <input type="file" id="studentListConfigFile" class="form-control" accept=".json" required>
+          </div>
+        </div>
+
+
+        <button type="submit" class="btn btn-primary" id="uploadBtn">
+          Upload &amp; Convert Dataset
+        </button>
+      </form>
+    </div>
+
+    <!-- Datasets List Card -->
+    <div class="card">
+      <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
+        <span>Available Datasets</span>
+        <button class="btn btn-outline btn-sm" onclick="loadDatasetsList(true)">↻ Refresh</button>
+      </div>
+      <div id="listAlert" class="alert"></div>
+      <div class="table-wrap">
+        <table id="datasetsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Dataset Name</th>
+              <th>Total Records</th>
+              <th>Uploaded At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="datasetsTableBody">
+            <tr><td colspan="5" class="no-data-msg">Loading datasets...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 2: PIVOT REPORT ================= -->
+  <div id="report-tab" class="tab-content">
+    <div class="card">
+      <div class="card-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+        <div style="display:flex; align-items:center; gap:1rem;">
+          <button class="btn btn-outline btn-sm" onclick="switchTab('datasets-tab')">← Back to Dashboard</button>
+          <span id="reportTitleName">Category Wise Department Report</span>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+          <select id="departmentFilterSelector" class="form-control" style="width: auto; font-weight: 600; display: none;" onchange="applyDepartmentFilter(this.value)">
+            <option value="all">All Departments</option>
+          </select>
+          <select id="activeDatasetSelector" class="form-control" style="width: auto; font-weight: 600;" onchange="loadReport(this.value)">
+            <option value="">-- Select Dataset --</option>
+          </select>
+        </div>
+      </div>
+      
+      <div id="reportAlert" class="alert"></div>
+
+      <!-- Pivot Table Container -->
+      <div id="reportContainer" style="display:none;">
+        <div class="table-wrap" style="margin-top:1rem;">
+          <table class="rep-table" id="pivotTable">
+            <thead>
+              <tr id="pivotTableHeader">
+                <!-- Dynamically generated -->
+              </tr>
+            </thead>
+            <tbody id="pivotTableBody">
+              <!-- Dynamically generated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div id="noReportSelected" class="no-data-msg">
+        Please select a dataset from the dropdown above to display the summary report.
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB 3: DRILL-DOWN ================= -->
+  <div id="drilldown-tab" class="tab-content">
+    
+    <!-- Active Filter Info -->
+    <div class="page-header-row" style="display: none;">
+      <div>
+        <h1 class="page-title-main" id="drillDownTitle">Drill-Down Records</h1>
+        <div class="page-subtitle-main" id="drillDownSubtitle">Select a cell in the report tab to populate matching records</div>
+      </div>
+      <div class="step-badge" id="drillDownBadge">FILTER: NONE</div>
+    </div>
+
+    <!-- Drill-down records list -->
+    <div class="card" id="drillDownListCard" style="display:none;">
+      <div class="card-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+        <div style="display:flex; align-items:center; gap:1rem;">
+          <button class="btn btn-outline btn-sm" onclick="switchTab('report-tab')">← Back to Report</button>
+          <span>Student List</span>
+        </div>
+        <div class="search-wrapper" style="margin: 0; max-width: 250px;">
+          <input type="text" id="drillDownSearchInput" class="form-control" placeholder="Search..." oninput="filterDrillDownList()">
+        </div>
+      </div>
+      
+      <div class="table-wrap">
+        <table id="drillDownTable">
+          <thead id="drillDownTableHeader">
+            <!-- Dynamically generated headers -->
+          </thead>
+          <tbody id="drillDownTableBody">
+            <!-- Dynamically generated rows -->
+          </tbody>
+        </table>
+      </div>
+      <div id="drillDownEmptyMsg" class="no-data-msg" style="display:none;">
+        No matching records found.
+      </div>
+    </div>
+
+    <div id="noDrillDownSelected" class="no-data-msg" style="text-align: center; padding: 3rem 1.5rem;">
+      <p style="margin-bottom: 1.5rem;">No active filter. Please go to the <strong>Report</strong> tab and click on any summary count or total cell to drill-down.</p>
+      <button class="btn btn-outline btn-sm" onclick="switchTab('report-tab')">← Back to Report</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================= INDIVIDUAL RECORD VIEW MODAL ================= -->
+<div class="modal-overlay" id="recordModal">
+  <div class="modal-container">
+    <!-- Print-only App Header -->
+    <div class="app-header-App">
+      <div class="App-banner-left">
+        <img src="images/App_logo.png" class="App-header-logo" alt="App Logo">
+      </div>
+      <div class="App-banner-right-top">
+        <div class="App-title-en">Application Portal, Main Campus</div>
+        <div class="App-sub-en">(Established by Ministry of Education, Government of India)</div>
+      </div>
+      <div class="App-banner-right-bottom">
+        <div class="App-form-title-text">Application Record Details</div>
+        <div class="App-app-id" id="modalRecordTitleId">Record Database ID: #N/A</div>
+      </div>
+    </div>
+
+    <div class="print-btn-bar" style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:1rem; margin-bottom:1.5rem;">
+      <h3 style="margin:0; font-family:'Outfit', sans-serif; color:var(--primary);">Individual Application View</h3>
+      <div style="display:flex; gap:0.5rem;">
+        <button class="btn btn-primary btn-sm" onclick="window.print()">Print</button>
+        <button class="btn btn-danger btn-sm modal-close-btn" onclick="closeRecordModal()">✕ Close</button>
+      </div>
+    </div>
+
+    <!-- Dynamically generated form fields go here -->
+    <div id="modalFormContent"></div>
+  </div>
+</div>
+
+<script src="js/app.js?v=1.0.26"></script>
+</body>
+</html>

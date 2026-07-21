@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Login - Dynamic CSV Reporting & Form Platform</title>
+  <link rel="stylesheet" href="css/style.css?v=1.0.25">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100vh;
+      background: var(--bg);
+    }
+    .login-container {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .login-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 420px;
+      padding: 2.5rem 2.25rem;
+      animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .login-header img {
+      max-height: 70px;
+      margin-bottom: 1rem;
+    }
+    .login-header h2 {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    .login-header p {
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+    .login-btn {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+    }
+    .login-footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: #ffffff;
+    }
+    .toggle-password-btn {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      transition: color 0.2s;
+    }
+    .toggle-password-btn:hover {
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── App Banner Header ── -->
+  <div class="App-banner">
+    <img src="images/App_banner.png" class="App-logo-img" alt="App Portal Logo">
+  </div>
+
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <img src="images/App_logo.png" alt="App Logo">
+        <h2>System Login</h2>
+        <p>CSV-to-JSON Reporting & Form Platform</p>
+      </div>
+
+      <div id="loginAlert" class="alert alert-error"></div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="userid">User ID / Username</label>
+          <input type="text" id="userid" class="form-control" placeholder="Enter your User ID" required autofocus>
+        </div>
+        
+        <div class="form-group" style="margin-top: 1.25rem;">
+          <label for="password">Password</label>
+          <div class="password-wrapper" style="position: relative;">
+            <input type="password" id="password" class="form-control" placeholder="Enter password" required style="padding-right: 40px;">
+            <button type="button" id="togglePassword" class="toggle-password-btn" aria-label="Toggle Password Visibility">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye" viewBox="0 0 24 24" id="eyeIcon">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary login-btn">
+          Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="login-footer">
+    © 2026 Application Portal (App), Main Campus. All Rights Reserved.
+  </div>
+
+  <script>
+    function handleLogin(e) {
+      e.preventDefault();
+      const alertDiv = document.getElementById("loginAlert");
+      alertDiv.style.display = "none";
+      alertDiv.textContent = "";
+
+      const userid = document.getElementById("userid").value.trim();
+      const password = document.getElementById("password").value;
+      const submitBtn = document.getElementById("submitBtn");
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span> Signing In...';
+
+      fetch("api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        body: JSON.stringify({ userid, password })
+      })
+      .then(resp => {
+        return resp.json().then(data => {
+          return { status: resp.status, body: data };
+        });
+      })
+      .then(res => {
+        if (res.status === 200 && res.body.success) {
+          // Redirect based on role and query parameters
+          const role = res.body.role ? res.body.role.trim() : "";
+          const link = res.body.link;
+          
+          if (role === "department") {
+            // Department role: redirects to the dedicated department landing page
+            window.location.href = "department.html";
+          } else if (role === "admission") {
+            // Admission role: redirects to the dedicated admission dashboard
+            window.location.href = "admission.html";
+          } else {
+            // Superadmin role: redirects to full index.html dashboard
+            window.location.href = "index.html";
+          }
+        } else {
+          throw new Error(res.body.message || "Login failed. Please check your credentials.");
+        }
+      })
+      .catch(err => {
+        alertDiv.textContent = err.message;
+        alertDiv.style.display = "block";
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Sign In";
+      });
+    }
+
+    // Toggle Password Visibility Logic
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePassword');
+    const eyeIcon = document.getElementById('eyeIcon');
+
+    toggleBtn.addEventListener('click', function () {
+      const isPassword = passwordInput.getAttribute('type') === 'password';
+      passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+      if (isPassword) {
+        eyeIcon.innerHTML = `
+          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>
+        `;
+      } else {
+        eyeIcon.innerHTML = `
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

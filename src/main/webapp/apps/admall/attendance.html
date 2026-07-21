@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Attendance Sheet</title>
+  <link rel="stylesheet" href="css/style.css?v=1.0.25">
+  <style>
+    body {
+      background: #f8fafc;
+      padding: 1.5rem;
+    }
+    .attendance-page {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 2.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+    }
+    .attendance-header {
+      text-align: center;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 1.5rem;
+    }
+    .attendance-logo {
+      max-height: 80px;
+      margin-bottom: 0.75rem;
+    }
+    .sheet-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .meta-details {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+      background: var(--primary-light);
+      padding: 1.25rem;
+      border-radius: var(--radius);
+      border-left: 5px solid var(--primary);
+      font-size: 0.92rem;
+    }
+    .meta-item {
+      margin-bottom: 0.5rem;
+    }
+    .meta-item:last-child {
+      margin-bottom: 0;
+    }
+    .photo-cell-img {
+      width: 70px;
+      height: 85px;
+      object-fit: cover;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: #f1f5f9;
+      display: block;
+      margin: 0 auto;
+    }
+    .photo-cell-placeholder {
+      width: 70px;
+      height: 85px;
+      border: 1px dashed var(--muted);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      color: var(--muted);
+      background: #f8fafc;
+      text-align: center;
+      margin: 0 auto;
+    }
+    .sig-cell-img {
+      max-height: 35px;
+      max-width: 110px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+    .sig-cell-box {
+      width: 140px;
+      height: 48px;
+      border: 1px dashed #94a3b8;
+      border-radius: 4px;
+      background: #fff;
+      margin: 0 auto;
+    }
+    /* Specific table styles for attendance sheet */
+    .att-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1.5rem;
+    }
+    .att-table th {
+      background: var(--primary);
+      color: #ffffff;
+      padding: 0.85rem 1rem;
+      font-weight: 700;
+      text-align: center;
+      border: 1px solid #1e293b;
+      font-size: 0.88rem;
+    }
+    .att-table td {
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      vertical-align: middle;
+      text-align: center;
+      font-size: 0.88rem;
+    }
+    .att-table tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+    .print-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    @media print {
+      @page {
+        margin: 8mm 6mm 8mm 6mm;
+      }
+      body {
+        background: #ffffff;
+        padding: 0;
+        margin: 0;
+        font-size: 9pt;
+      }
+      .attendance-page {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+        width: 100%;
+      }
+      .print-controls, .no-print {
+        display: none !important;
+      }
+      .att-table {
+        width: 100% !important;
+        font-size: 7.5pt !important;
+        table-layout: auto !important;
+        word-wrap: break-word !important;
+      }
+      .att-table th {
+        background: #e8e8e8 !important;
+        color: #000000 !important;
+        border: 1px solid #000000 !important;
+        padding: 0.2rem 0.3rem !important;
+        font-size: 7.5pt !important;
+      }
+      .att-table td {
+        border: 1px solid #000000 !important;
+        padding: 0.2rem 0.3rem !important;
+        font-size: 7.5pt !important;
+        word-break: break-word !important;
+      }
+      .att-table thead {
+        display: table-header-group !important;
+      }
+      .att-table tr {
+        page-break-inside: avoid !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="print-controls no-print">
+  <div style="font-family:'Outfit', sans-serif; color:var(--primary); font-size:1.1rem; font-weight:700;">
+    Candidates Attendance Sheet
+  </div>
+  <div style="display:flex; gap:0.5rem;">
+    <button class="btn btn-primary btn-sm" onclick="window.print()">Print</button>
+    <button class="btn btn-danger btn-sm" onclick="window.close()">✕ Close</button>
+  </div>
+</div>
+
+<div class="attendance-page">
+  <div class="attendance-header">
+    <img src="images/App_logo.png" class="attendance-logo" alt="App Logo" onerror="this.style.display='none'">
+    <div class="sheet-title">Application Portal, Main Campus</div>
+    <div style="font-weight:700; font-size:1.1rem; margin-top:0.5rem; color:var(--text);">Attendance Sheet</div>
+  </div>
+
+  <div class="meta-details">
+    <div>
+      <div class="meta-item"><strong>Department:</strong> <span id="metaDepartment">Loading...</span></div>
+      <div class="meta-item"><strong>Date of Examination:</strong> ________________________</div>
+    </div>
+    <div>
+      <div class="meta-item"><strong>Total Candidates:</strong> <span id="metaTotalCandidates">0</span></div>
+    </div>
+  </div>
+
+  <div id="loading" style="text-align:center; padding:3rem; color:var(--muted)">
+    <span class="spinner"></span> Loading candidates records...
+  </div>
+  <div id="alert" class="alert"></div>
+
+  <div id="attendanceTableContainer" style="display:none;">
+    <table class="att-table">
+      <thead>
+        <tr id="tableHeaderRow">
+          <!-- Dynamically generated -->
+        </tr>
+      </thead>
+      <tbody id="tableBodyRow">
+        <!-- Dynamically generated -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const params = new URLSearchParams(location.search);
+    const datasetId = params.get("datasetId");
+    const departmentName = params.get("department");
+
+    if (!datasetId || !departmentName) {
+      showError("Error: Missing datasetId or department parameter in URL.");
+      return;
+    }
+
+    document.getElementById("metaDepartment").textContent = departmentName;
+
+    // 1. Fetch Session and Validate
+    fetch("api/session")
+      .then(resp => {
+        if (!resp.ok) throw new Error("Authentication failed.");
+        return resp.json();
+      })
+      .then(session => {
+        if (!session.loggedIn) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        if (session.role && session.role.trim() === "department") {
+          // Parse forced params from session link
+          const link = session.link;
+          let forcedDatasetId = null;
+          let forcedDept = null;
+          if (link) {
+            let queryString = link;
+            if (link.includes("?")) {
+              queryString = link.split("?")[1];
+            }
+            if (queryString.includes("=")) {
+              const pairs = queryString.split("&");
+              pairs.forEach(pair => {
+                const kv = pair.split("=");
+                if (kv.length === 2) {
+                  if (kv[0] === "datasetId") forcedDatasetId = kv[1];
+                  if (kv[0] === "department") forcedDept = decodeURIComponent(kv[1].replace(/\+/g, " "));
+                }
+              });
+            } else {
+              // Plain department string link fallback
+              forcedDept = link;
+            }
+          }
+          
+          if (!forcedDept && session.username) {
+            forcedDept = session.username;
+          }
+
+          // Force parameters to match the user's session scope
+          if (forcedDatasetId && String(datasetId) !== String(forcedDatasetId)) {
+            throw new Error("Access denied. You do not have access to this dataset.");
+          }
+          if (forcedDept && departmentName.trim().toLowerCase() !== forcedDept.trim().toLowerCase()) {
+            throw new Error("Access denied. You do not have access to this department.");
+          }
+        }
+
+        // Proceed to fetch config & drilldown records
+        return Promise.all([
+          fetch(`api/datasets?action=getAttendanceConfig&datasetId=${datasetId}`).then(r => r.json()),
+          fetch(`api/drilldown?datasetId=${datasetId}`).then(r => r.json())
+        ]);
+      })
+      .then(([config, allRecords]) => {
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("attendanceTableContainer").style.display = "block";
+
+      // Resolve table configuration (candidateSummaryTable)
+      let tableDef = null;
+      if (config && config.tables && config.tables.candidateSummaryTable) {
+        tableDef = config.tables.candidateSummaryTable;
+      } else if (config && config.candidateSummaryTable) {
+        tableDef = config.candidateSummaryTable;
+      } else {
+        // Fallback to default definition from prompt
+        tableDef = {
+          "columns": [
+            "id",
+            "name",
+            "department",
+            "photograph",
+            "uploadedSignature",
+            "signature"
+          ],
+          "source": [
+            "candidateId",
+            "B1",
+            "A2",
+            "S11",
+            "S12",
+            ""
+          ]
+        };
+      }
+
+      // 2. Filter Candidates matching the selected department
+      const candidates = allRecords.filter(entry => {
+        const record = entry.record;
+        // Check A2 prefix
+        const a2Match = getRecordFieldValueByPrefix(record, "A2");
+        if (a2Match && String(a2Match.value).trim().toLowerCase() === departmentName.trim().toLowerCase()) {
+          return true;
+        }
+        // General search fallback
+        for (let key in record) {
+          if (String(record[key]).trim().toLowerCase() === departmentName.trim().toLowerCase()) {
+            return true;
+          }
+        }
+        return false;
+      });
+
+      document.getElementById("metaTotalCandidates").textContent = candidates.length;
+
+      if (candidates.length === 0) {
+        showError("No candidates found registered in this department.");
+        return;
+      }
+
+      // 3. Render Table
+      renderAttendanceTable(tableDef, candidates);
+    })
+    .catch(err => {
+      document.getElementById("loading").style.display = "none";
+      showError("Failed to load attendance sheet: " + err.message);
+    });
+  });
+
+  function showError(msg) {
+    const alertDiv = document.getElementById("alert");
+    alertDiv.style.display = "block";
+    alertDiv.className = "alert alert-error show";
+    alertDiv.textContent = msg;
+  }
+
+  function getRecordFieldValueByPrefix(record, prefix) {
+    if (!record || !prefix) return null;
+    const lowerPrefix = prefix.toLowerCase().trim();
+    for (let key in record) {
+      const lowerKey = key.toLowerCase().trim();
+      if (lowerKey === lowerPrefix) {
+        return { key: key, value: record[key] };
+      }
+      if (lowerKey.startsWith(lowerPrefix)) {
+        const remaining = lowerKey.slice(lowerPrefix.length);
+        if (remaining.length === 0 || !/^[a-z0-9]/.test(remaining)) {
+          return { key: key, value: record[key] };
+        }
+      }
+    }
+    return null;
+  }
+
+  function cleanColumnHeader(col) {
+    if (col === "id") return "Candidate ID";
+    if (col === "name") return "Candidate Name";
+    if (col === "department") return "Department";
+    if (col === "photograph") return "Photograph";
+    if (col === "uploadedSignature") return "Uploaded Signature";
+    if (col === "signature") return "Signature (Sign Here)";
+    
+    return col.replace(/([A-Z])/g, ' $1')
+              .replace(/^[a-z]/, c => c.toUpperCase())
+              .trim();
+  }
+
+  function renderAttendanceTable(tableDef, candidates) {
+    const headerRow = document.getElementById("tableHeaderRow");
+    const bodyRow = document.getElementById("tableBodyRow");
+
+    headerRow.innerHTML = "";
+    bodyRow.innerHTML = "";
+
+    const columns = tableDef.columns || [];
+    const source = tableDef.source || [];
+
+    // Render Headers
+    columns.forEach(col => {
+      const th = document.createElement("th");
+      th.textContent = cleanColumnHeader(col);
+      headerRow.appendChild(th);
+    });
+
+    // Render Candidate Rows
+    candidates.forEach((entry, idx) => {
+      const tr = document.createElement("tr");
+      const record = entry.record;
+
+      columns.forEach((col, colIdx) => {
+        const td = document.createElement("td");
+        const prefix = source[colIdx];
+        let val = "";
+
+        if (prefix && prefix.trim() !== "") {
+          const match = getRecordFieldValueByPrefix(record, prefix);
+          val = match ? match.value : "";
+        }
+
+        // Custom formatting per column type
+        if (col === "id") {
+          // If no custom candidate ID found in the CSV, fallback to serial/database ID
+          td.textContent = (val && val.trim() !== "") ? val : `#${entry.id}`;
+        }
+        else if (col === "photograph") {
+          if (val && String(val).trim().startsWith("http")) {
+            td.innerHTML = `<img src="${val.trim()}" class="photo-cell-img" alt="Photo">`;
+          } else {
+            td.innerHTML = `<div class="photo-cell-placeholder">Paste Photograph<br>Here</div>`;
+          }
+        }
+        else if (col === "uploadedSignature") {
+          if (val && String(val).trim().startsWith("http")) {
+            td.innerHTML = `<img src="${val.trim()}" class="sig-cell-img" alt="Signature">`;
+          } else {
+            td.textContent = "—";
+          }
+        }
+        else if (col === "signature") {
+          td.innerHTML = `<div class="sig-cell-box"></div>`;
+        }
+        else {
+          td.textContent = val || "—";
+        }
+
+        tr.appendChild(td);
+      });
+
+      bodyRow.appendChild(tr);
+    });
+  }
+</script>
+</body>
+</html>

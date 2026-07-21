@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Student Login - Admit Card Portal</title>
+  <link rel="stylesheet" href="css/style.css?v=1.0.25">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100vh;
+      background: var(--bg);
+    }
+    .login-container {
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .login-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 440px;
+      padding: 2.5rem 2.25rem;
+      animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .login-header img {
+      max-height: 70px;
+      margin-bottom: 1rem;
+    }
+    .login-header h2 {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+    .login-header p {
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+    .login-btn {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 0.75rem 1.5rem;
+    }
+    .login-footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: #ffffff;
+    }
+    .alert {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      margin-bottom: 1.25rem;
+      font-size: 0.88rem;
+      display: none;
+    }
+    .alert-error {
+      background-color: #fee2e2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── App Banner Header ── -->
+  <div class="App-banner">
+    <img src="images/App_banner.png" class="App-logo-img" alt="App Portal Logo">
+  </div>
+
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <img src="images/App_logo.png" alt="App Logo">
+        <h2>Student Admit Card Portal</h2>
+        <p>Enter details to download your examination admit card</p>
+      </div>
+
+      <div id="loginAlert" class="alert alert-error"></div>
+
+      <form id="studentLoginForm" onsubmit="handleStudentLogin(event)">
+        <div class="form-group">
+          <label for="enrollmentNumber">Enrollment Number</label>
+          <input type="text" id="enrollmentNumber" class="form-control" placeholder="Enter your Enrollment Number" required autofocus>
+        </div>
+        
+        <div class="form-group" style="margin-top: 1.25rem;">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" class="form-control" placeholder="Enter your registered Email Address" required>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary login-btn">
+          Access Admit Card
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="login-footer">
+    © 2026 Application Portal (App), Main Campus. All Rights Reserved.
+  </div>
+
+  <script>
+    function handleStudentLogin(e) {
+      e.preventDefault();
+      const alertDiv = document.getElementById("loginAlert");
+      alertDiv.style.display = "none";
+      alertDiv.textContent = "";
+
+      const enrollmentNumber = document.getElementById("enrollmentNumber").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const submitBtn = document.getElementById("submitBtn");
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span> Verifying...';
+
+      fetch("api/student-login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        body: JSON.stringify({ enrollmentNumber, email })
+      })
+      .then(resp => {
+        if (resp.status === 200) {
+          return resp.json();
+        } else if (resp.status === 404) {
+          throw new Error("No record found. Please check your Enrollment Number and Email Address.");
+        } else {
+          return resp.json().then(data => {
+            throw new Error(data.message || "An unexpected error occurred. Please try again.");
+          }).catch(() => {
+            throw new Error("An unexpected error occurred. Please try again.");
+          });
+        }
+      })
+      .then(data => {
+        if (data.success) {
+          window.location.href = `student_admitcard.html?token=${encodeURIComponent(data.token)}`;
+        } else {
+          throw new Error("Verification failed.");
+        }
+      })
+      .catch(err => {
+        alertDiv.textContent = err.message;
+        alertDiv.style.display = "block";
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Access Admit Card";
+      });
+    }
+  </script>
+</body>
+</html>

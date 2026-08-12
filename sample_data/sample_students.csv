@@ -1,0 +1,6 @@
+RollNo,StudentName,Department,Email,Phone,AdmissionStatus,AdmitCardStatus
+2025001,Aarav Sharma,Computer Science & Engineering,aarav.sharma@example.com,9876543210,Admitted,Generated
+2025002,Priya Patel,Electronics & Communication,priya.patel@example.com,9876543211,Verified,Generated
+2025003,Rohan Gupta,Mechanical Engineering,rohan.gupta@example.com,9876543212,Pending,In Process
+2025004,Sneha Rao,Civil Engineering,sneha.rao@example.com,9876543213,Admitted,Generated
+2025005,Kabir Verma,Information Technology,kabir.verma@example.com,9876543214,Verified,Generated
